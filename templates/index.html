@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeinVision Pro - Medical Imaging System</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    
+    <style>
+        :root {
+            --primary: #0d6efd;
+            --secondary: #6c757d;
+            --success: #198754;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #0dcaf0;
+        }
+        
+        body {
+            padding-top: 20px;
+            padding-bottom: 20px;
+            background-color: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, #052c65, #0d6efd);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .video-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            background-color: #000;
+            height: 480px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .video-stream {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .camera-info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+        }
+        
+        .settings-card {
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .settings-header {
+            background: linear-gradient(to right, #0d6efd, #0a58ca);
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+        }
+        
+        .settings-body {
+            background-color: #f8f9fa;
+            padding: 15px;
+        }
+        
+        .gallery-container {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .gallery-image {
+            cursor: pointer;
+            transition: all 0.3s;
+            max-height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .gallery-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-image {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 8px;
+        }
+        
+        .system-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(13, 110, 253, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .patient-info {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .notes-section {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .system-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .system-control .btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .highlight {
+            animation: highlight 2s;
+        }
+        
+        @keyframes highlight {
+            0% { background-color: #fffacd; }
+            100% { background-color: transparent; }
+        }
+        
+        /* Dark mode styles */
+        .dark-mode {
+            background-color: #212529;
+            color: #f8f9fa;
+        }
+        
+        .dark-mode .main-container {
+            background-color: #343a40;
+            color: #f8f9fa;
+        }
+        
+        .dark-mode .settings-body {
+            background-color: #495057;
+            color: #f8f9fa;
+        }
+        
+        .dark-mode .gallery-container {
+            background-color: #343a40;
+        }
+        
+        .dark-mode .stat-card {
+            background-color: #343a40;
+            color: #f8f9fa;
+        }
+        
+        .dark-mode .form-control,
+        .dark-mode .form-select {
+            background-color: #495057;
+            color: #f8f9fa;
+            border-color: #6c757d;
+        }
+        
+        .dark-mode .modal-content {
+            background-color: #343a40;
+            color: #f8f9fa;
+        }
+        
+        .dark-mode .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- App Header -->
+        <div class="app-header">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1><i class="fas fa-eye me-2"></i>VeinVision Pro</h1>
+                    <p class="mb-0">Advanced Medical Imaging System for Venipuncture Assistance</p>
+                </div>
+                <div class="col-md-6 d-flex justify-content-end">
+                    <div class="btn-group">
+                        <button id="darkModeToggle" class="btn btn-outline-light">
+                            <i class="fas fa-moon me-2"></i>Dark Mode
+                        </button>
+                        <button id="settingsBtn" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                            <i class="fas fa-cog me-2"></i>Settings
+                        </button>
+                        <button id="shutdownBtn" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#shutdownModal">
+                            <i class="fas fa-power-off me-2"></i>Power
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Stats -->
+        <div class="system-stats">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <div>
+                    <div class="small text-muted">Images Captured</div>
+                    <div class="fs-4 fw-bold" id="captureCounter">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: rgba(25, 135, 84, 0.1); color: var(--success);">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <div>
+                    <div class="small text-muted">LED Status</div>
+                    <div class="fs-4 fw-bold" id="ledStatus">Active</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: rgba(13, 202, 240, 0.1); color: var(--info);">
+                    <i class="fas fa-microchip"></i>
+                </div>
+                <div>
+                    <div class="small text-muted">System Status</div>
+                    <div class="fs-4 fw-bold" id="systemStatus">Online</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: rgba(220, 53, 69, 0.1); color: var(--danger);">
+                    <i class="fas fa-sliders-h"></i>
+                </div>
+                <div>
+                    <div class="small text-muted">Detection Method</div>
+                    <div class="fs-4 fw-bold" id="detectionMethodDisplay">{{ settings.detection_method }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-container">
+            <div class="row">
+                <!-- Patient Info Section -->
+                <div class="col-md-4">
+                    <div class="patient-info mb-3">
+                        <h5><i class="fas fa-user-alt me-2"></i>Patient Information</h5>
+                        <form id="patientForm">
+                            <div class="mb-3">
+                                <label for="patientId" class="form-label">Patient ID</label>
+                                <input type="text" class="form-control" id="patientId" placeholder="Enter patient ID">
+                            </div>
+                            <div class="mb-3">
+                                <label for="patientName" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="patientName" placeholder="Enter patient name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="patientAge" class="form-label">Age</label>
+                                <input type="number" class="form-control" id="patientAge" placeholder="Enter age">
+                            </div>
+                            <div class="mb-3">
+                                <label for="procedureType" class="form-label">Procedure</label>
+                                <select class="form-select" id="procedureType">
+                                    <option value="">Select procedure</option>
+                                    <option value="venipuncture">Venipuncture</option>
+                                    <option value="iv">IV Placement</option>
+                                    <option value="injection">Injection</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Save Patient Info</button>
+                        </form>
+                    </div>
+                    
+                    <!-- Settings Panel -->
+                    <div class="settings-card">
+                        <div class="settings-header">
+                            <i class="fas fa-sliders-h me-2"></i>Image Settings
+                        </div>
+                        <div class="settings-body">
+                            <form id="settingsForm">
+                                <div class="mb-3">
+                                    <label for="detectionMethod" class="form-label">Vein Detection Method</label>
+                                    <select id="detectionMethod" class="form-select">
+                                        <option value="adaptive" {% if settings.detection_method == 'adaptive' %}selected{% endif %}>Adaptive Threshold</option>
+                                        <option value="frangi" {% if settings.detection_method == 'frangi' %}selected{% endif %}>Frangi Filter</option>
+                                        <option value="laplacian" {% if settings.detection_method == 'laplacian' %}selected{% endif %}>Laplacian</option>
+                                        <option value="none" {% if settings.detection_method == 'none' %}selected{% endif %}>None (Raw)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="contrastMethod" class="form-label">Contrast Enhancement</label>
+                                    <select id="contrastMethod" class="form-select">
+                                        <option value="clahe" {% if settings.contrast_method == 'clahe' %}selected{% endif %}>CLAHE</option>
+                                        <option value="histogram_equalization" {% if settings.contrast_method == 'histogram_equalization' %}selected{% endif %}>Histogram Equalization</option>
+                                        <option value="none" {% if settings.contrast_method == 'none' %}selected{% endif %}>None</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="cameraExposure" class="form-label">Exposure Time (μs): <span id="exposureValue">{{ settings.camera_exposure }}</span></label>
+                                    <input type="range" class="form-range" id="cameraExposure" min="1000" max="100000" step="1000" value="{{ settings.camera_exposure }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="cameraGain" class="form-label">Camera Gain: <span id="gainValue">{{ settings.camera_gain }}</span></label>
+                                    <input type="range" class="form-range" id="cameraGain" min="1" max="16" step="0.5" value="{{ settings.camera_gain }}">
+                                </div>
+                                
+                                <button id="applyCameraSettings" type="submit" class="btn btn-primary w-100">Apply Settings</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- LED Controls -->
+                    <div class="settings-card mt-3">
+                        <div class="settings-header">
+                            <i class="fas fa-lightbulb me-2"></i>LED Controls
+                        </div>
+                        <div class="settings-body">
+                            <div class="mb-3">
+                                <label for="ledBrightness" class="form-label">LED Brightness: <span id="brightnessValue">{{ settings.led_brightness }}</span></label>
+                                <input type="range" class="form-range" id="ledBrightness" min="0" max="255" value="{{ settings.led_brightness }}">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="ledPattern" class="form-label">LED Pattern</label>
+                                <select id="ledPattern" class="form-select">
+                                    <option value="1" {% if settings.led_pattern == 1 %}selected{% endif %}>All On</option>
+                                    <option value="2" {% if settings.led_pattern == 2 %}selected{% endif %}>Alternate</option>
+                                    <option value="3" {% if settings.led_pattern == 3 %}selected{% endif %}>Sequential</option>
+                                </select>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button id="toggleLEDs" class="btn btn-primary">
+                                    <i class="fas fa-power-off me-2"></i>Toggle LEDs
+                                </button>
+                                <button id="applyLEDSettings" class="btn btn-outline-primary">
+                                    <i class="fas fa-save me-2"></i>Apply LED Settings
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Video Feed and Image Capture Section -->
+                <div class="col-md-8">
+                    <div class="video-container mb-3">
+                        <div class="camera-info">
+                            <i class="fas fa-circle text-danger me-1"></i> LIVE
+                            <span class="ms-2" id="exposureInfo">Exp: {{ settings.camera_exposure }}μs</span>
+                            <span class="ms-2" id="gainInfo">Gain: {{ settings.camera_gain }}</span>
+                        </div>
+                        <img src="{{ url_for('video_feed') }}" class="video-stream">
+                        <div class="video-controls">
+                            <button id="captureBtn" class="btn btn-danger">
+                                <i class="fas fa-camera me-2"></i>Capture
+                                <span id="captureSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            </button>
+                            <button id="zoomInBtn" class="btn btn-light">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                            <button id="zoomOutBtn" class="btn btn-light">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button id="rotateBtn" class="btn btn-light">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button id="fullscreenBtn" class="btn btn-light">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Last Captured Image -->
+                    <div id="lastCapturedContainer" class="mb-3 d-none">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Last Captured Image</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <img id="lastCapturedImg" class="img-fluid" style="max-height: 200px;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Captured Image Info -->
+                    <div class="alert alert-success d-none" id="capturedImageInfo">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0"><i class="fas fa-check-circle me-2"></i>Image Captured Successfully</h5>
+                                <p class="mb-0">Timestamp: <span id="captureTimestamp"></span></p>
+                            </div>
+                            <div class="btn-group">
+                                <a href="#" id="viewOriginalBtn" class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-eye me-1"></i>View Original
+                                </a>
+                                <a href="#" id="viewProcessedBtn" class="btn btn-sm btn-success">
+                                    <i class="fas fa-eye me-1"></i>View Processed
+                                </a>
+                                <a href="#" id="downloadBtn" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-download me-1"></i>Download
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notes Section -->
+                    <div class="notes-section">
+                        <h5><i class="fas fa-sticky-note me-2"></i>Procedure Notes</h5>
+                        <div class="mb-3">
+                            <textarea class="form-control" id="procedureNotes" rows="3" placeholder="Enter notes about the procedure, vein condition, etc."></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button id="saveNotesBtn" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Notes
+                            </button>
+                            <button id="clearNotesBtn" class="btn btn-outline-secondary">
+                                <i class="fas fa-eraser me-2"></i>Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Image Gallery -->
+        <div class="gallery-container" id="gallery">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3><i class="fas fa-images me-2"></i>Image Gallery</h3>
+                <div class="btn-group">
+                    <button id="refreshGalleryBtn" class="btn btn-primary">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh
+                    </button>
+                    <button id="clearGalleryBtn" class="btn btn-outline-danger">
+                        <i class="fas fa-trash me-2"></i>Clear All
+                    </button>
+                </div>
+            </div>
+            
+            <div class="row" id="imageGallery">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading saved images...</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="text-center text-muted mt-4">
+            <p>VeinVision Pro | Advanced Medical Imaging System for Venipuncture Assistance</p>
+            <p class="small">System Version 1.0 | <a href="#" data-bs-toggle="modal" data-bs-target="#aboutModal">About</a></p>
+        </footer>
+    </div>
+    
+    <!-- System Control Buttons -->
+    <div class="system-control">
+        <button class="btn btn-primary" title="Help" data-bs-toggle="modal" data-bs-target="#helpModal">
+            <i class="fas fa-question"></i>
+        </button>
+        <button class="btn btn-success" title="System Info" data-bs-toggle="modal" data-bs-target="#systemInfoModal">
+            <i class="fas fa-info"></i>
+        </button>
+        <button class="btn btn-danger" title="Shutdown" data-bs-toggle="modal" data-bs-target="#shutdownModal">
+            <i class="fas fa-power-off"></i>
+        </button>
+    </div>
+    
+    <!-- Image Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalTitle">Image Viewer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="modalImage" class="modal-image">
+                    
+                    <div class="mt-3">
+                        <div class="row">
+                            <div class="col-md-6 text-center mb-2">
+                                <button id="modalViewOriginal" class="btn btn-outline-primary">View Original</button>
+                            </div>
+                            <div class="col-md-6 text-center mb-2">
+                                <button id="modalViewProcessed" class="btn btn-outline-success">View Processed</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 text-start" id="imageMetadata">
+                        <h6>Image Information</h6>
+                        <div id="metadataContent" class="small">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="modalDownload" type="button" class="btn btn-secondary">Download</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        $(document).ready(function() {
+            // Common variables
+            const settings = {
+                detection_method: 'vein',
+                contrast_method: 'clahe',
+                led_brightness: 50,
+                led_pattern: 1,
+                camera_exposure: 20000,
+                camera_gain: 10
+            };
+            
+            // Load settings initially
+            fetch('/get_settings')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Object.assign(settings, data.settings);
+                        
+                        // Update UI controls
+                        document.getElementById('detectionMethod').value = settings.detection_method;
+                        document.getElementById('contrastMethod').value = settings.contrast_method;
+                        document.getElementById('ledBrightness').value = settings.led_brightness;
+                        document.getElementById('ledPattern').value = settings.led_pattern;
+                        document.getElementById('cameraExposure').value = settings.camera_exposure;
+                        document.getElementById('cameraGain').value = settings.camera_gain;
+                        
+                        // Update displayed values
+                        document.getElementById('brightnessValue').textContent = settings.led_brightness;
+                        document.getElementById('exposureValue').textContent = settings.camera_exposure;
+                        document.getElementById('gainValue').textContent = settings.camera_gain;
+                        
+                        updateCameraInfo();
+                    }
+                });
+            
+            // Initialize range sliders
+            const ledBrightness = document.getElementById('ledBrightness');
+            const brightnessValue = document.getElementById('brightnessValue');
+            
+            ledBrightness.addEventListener('input', function() {
+                brightnessValue.textContent = this.value;
+            });
+            
+            const cameraExposure = document.getElementById('cameraExposure');
+            const exposureValue = document.getElementById('exposureValue');
+            
+            cameraExposure.addEventListener('input', function() {
+                exposureValue.textContent = this.value;
+            });
+            
+            const cameraGain = document.getElementById('cameraGain');
+            const gainValue = document.getElementById('gainValue');
+            
+            cameraGain.addEventListener('input', function() {
+                gainValue.textContent = this.value;
+            });
+            
+            // Apply camera settings
+            document.getElementById('applyCameraSettings').addEventListener('click', function() {
+                const updatedSettings = {
+                    camera_exposure: parseInt(cameraExposure.value),
+                    camera_gain: parseInt(cameraGain.value),
+                    detection_method: document.getElementById('detectionMethod').value,
+                    contrast_method: document.getElementById('contrastMethod').value
+                };
+                
+                Object.assign(settings, updatedSettings);
+                
+                fetch('/update_settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedSettings)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('Camera settings updated successfully', 'success');
+                        updateCameraInfo();
+                    } else {
+                        showAlert('Error updating camera settings', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('Error communicating with server', 'danger');
+                });
+            });
+            
+            // Capture image function
+            document.getElementById('captureBtn').addEventListener('click', captureImage);
+            
+            function captureImage() {
+                // Show loading indicator
+                document.getElementById('captureBtn').disabled = true;
+                document.getElementById('captureSpinner').classList.remove('d-none');
+                
+                fetch('/capture', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        patient_id: document.getElementById('patientId').value || 'unknown',
+                        detection_method: settings.detection_method,
+                        contrast_method: settings.contrast_method
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loading indicator
+                    document.getElementById('captureBtn').disabled = false;
+                    document.getElementById('captureSpinner').classList.add('d-none');
+                    
+                    if (data.success) {
+                        showAlert('Image captured successfully', 'success');
+                        // Update the last captured image
+                        const lastCapturedImg = document.getElementById('lastCapturedImg');
+                        lastCapturedImg.src = data.processed_image + '?t=' + new Date().getTime();
+                        
+                        // Show the last captured image container
+                        document.getElementById('lastCapturedContainer').classList.remove('d-none');
+                        
+                        // Update counter
+                        updateCaptureCounter();
+                        
+                        // Refresh gallery
+                        loadImageGallery();
+                    } else {
+                        showAlert('Error capturing image: ' + data.message, 'danger');
+                    }
+                })
+                .catch(error => {
+                    // Hide loading indicator
+                    document.getElementById('captureBtn').disabled = false;
+                    document.getElementById('captureSpinner').classList.add('d-none');
+                    
+                    console.error('Error:', error);
+                    showAlert('Error communicating with server', 'danger');
+                });
+            }
+            
+            // Load image gallery
+            function loadImageGallery() {
+                const galleryContainer = document.getElementById('imageGallery');
+                galleryContainer.innerHTML = '<div class="text-center p-3"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+                
+                fetch('/images')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.images.length === 0) {
+                            galleryContainer.innerHTML = '<p class="text-center text-muted">No images captured yet.</p>';
+                            return;
+                        }
+                        
+                        galleryContainer.innerHTML = '';
+                        
+                        // Sort images newest first
+                        data.images.sort((a, b) => {
+                            return new Date(b.timestamp) - new Date(a.timestamp);
+                        });
+                        
+                        data.images.forEach(image => {
+                            const imageCard = document.createElement('div');
+                            imageCard.className = 'col-md-6 col-lg-4 mb-3';
+                            
+                            const formattedTime = new Date(image.timestamp).toLocaleString();
+                            const patientInfo = image.patient_id ? `Patient: ${image.patient_id}` : 'No patient info';
+                            
+                            imageCard.innerHTML = `
+                                <div class="card h-100">
+                                    <img src="${image.processed_image}?t=${new Date().getTime()}" class="card-img-top gallery-img" alt="Captured image" 
+                                         data-bs-toggle="modal" data-bs-target="#imageModal" data-img-src="${image.processed_image}">
+                                    <div class="card-body">
+                                        <h6 class="card-title">${formattedTime}</h6>
+                                        <p class="card-text small mb-0">${patientInfo}</p>
+                                        <p class="card-text small mb-0">Method: ${image.detection_method || 'vein'}</p>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="btn-group btn-group-sm w-100">
+                                            <button class="btn btn-outline-primary download-btn" data-img-path="${image.processed_image}">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger delete-btn" data-img-path="${image.processed_image}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            galleryContainer.appendChild(imageCard);
+                        });
+                        
+                        // Add event listeners to gallery images
+                        document.querySelectorAll('.gallery-img').forEach(img => {
+                            img.addEventListener('click', function() {
+                                const modalImg = document.getElementById('modalImage');
+                                const imgPath = this.getAttribute('data-img-src');
+                                modalImg.src = imgPath + '?t=' + new Date().getTime();
+                                
+                                // Setup the download button
+                                const downloadBtn = document.getElementById('modalDownload');
+                                // Use this as a click handler instead of href
+                                downloadBtn.onclick = function() {
+                                    const link = document.createElement('a');
+                                    link.href = imgPath;
+                                    link.download = imgPath.split('/').pop();
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                };
+                            });
+                        });
+                        
+                        // Add event listeners to delete buttons
+                        document.querySelectorAll('.delete-btn').forEach(btn => {
+                            btn.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                if (confirm('Are you sure you want to delete this image?')) {
+                                    deleteImage(this.getAttribute('data-img-path'));
+                                }
+                            });
+                        });
+                        
+                        // Add event listeners to download buttons
+                        document.querySelectorAll('.download-btn').forEach(btn => {
+                            btn.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                const link = document.createElement('a');
+                                link.href = this.getAttribute('data-img-path');
+                                link.download = this.getAttribute('data-img-path').split('/').pop();
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            });
+                        });
+                        
+                        // Update counter
+                        document.getElementById('captureCounter').textContent = data.images.length;
+                    } else {
+                        galleryContainer.innerHTML = '<p class="text-center text-danger">Error loading images.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    galleryContainer.innerHTML = '<p class="text-center text-danger">Error communicating with server.</p>';
+                });
+            }
+            
+            // Delete image
+            function deleteImage(imagePath) {
+                fetch('/delete_image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({image_path: imagePath})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('Image deleted successfully', 'success');
+                        loadImageGallery();
+                    } else {
+                        showAlert('Error deleting image', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('Error communicating with server', 'danger');
+                });
+            }
+            
+            // Show alert function
+            function showAlert(message, type) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+                alertDiv.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                
+                document.querySelector('.container').prepend(alertDiv);
+                
+                // Auto-dismiss after 5 seconds
+                setTimeout(() => {
+                    // Bootstrap 5 way of removing the alert
+                    alertDiv.classList.remove('show');
+                    setTimeout(() => {
+                        alertDiv.remove();
+                    }, 150); // Wait for fade out animation
+                }, 5000);
+            }
+            
+            // Update camera info based on settings
+            function updateCameraInfo() {
+                fetch('/camera_info')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update exposure and gain info in the camera-info div
+                        document.getElementById('exposureInfo').textContent = `Exp: ${data.camera_info.exposure}μs`;
+                        document.getElementById('gainInfo').textContent = `Gain: ${data.camera_info.gain}`;
+                        
+                        // Update detection method display
+                        document.getElementById('detectionMethodDisplay').textContent = settings.detection_method;
+                    }
+                });
+            }
+            
+            // Update capture counter
+            function updateCaptureCounter() {
+                fetch('/image_count')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('captureCounter').textContent = data.count;
+                    }
+                });
+            }
+            
+            // Toggle LEDs
+            document.getElementById('toggleLEDs').addEventListener('click', function() {
+                fetch('/toggle_leds', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const ledStatus = document.getElementById('ledStatus');
+                        ledStatus.textContent = data.led_status ? 'Active' : 'Inactive';
+                        showAlert(`LEDs ${data.led_status ? 'activated' : 'deactivated'} successfully`, 'success');
+                    } else {
+                        showAlert('Error toggling LEDs', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('Error communicating with server', 'danger');
+                });
+            });
+            
+            // Apply LED settings
+            document.getElementById('applyLEDSettings').addEventListener('click', function() {
+                const updatedSettings = {
+                    led_brightness: parseInt(document.getElementById('ledBrightness').value),
+                    led_pattern: parseInt(document.getElementById('ledPattern').value)
+                };
+                
+                Object.assign(settings, updatedSettings);
+                
+                fetch('/update_settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedSettings)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('LED settings updated successfully', 'success');
+                    } else {
+                        showAlert('Error updating LED settings', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('Error communicating with server', 'danger');
+                });
+            });
+            
+            // Clear gallery
+            document.getElementById('clearGalleryBtn').addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear all saved images? This cannot be undone.')) {
+                    fetch('/clear_gallery', {
+                        method: 'POST'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showAlert('Gallery cleared successfully', 'success');
+                            loadImageGallery();
+                        } else {
+                            showAlert('Error clearing gallery', 'danger');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('Error communicating with server', 'danger');
+                    });
+                }
+            });
+            
+            // Refresh gallery
+            document.getElementById('refreshGalleryBtn').addEventListener('click', function() {
+                loadImageGallery();
+                showAlert('Gallery refreshed', 'info');
+            });
+            
+            // Save patient form
+            document.getElementById('patientForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const patientData = {
+                    patient_id: document.getElementById('patientId').value,
+                    name: document.getElementById('patientName').value,
+                    age: document.getElementById('patientAge').value,
+                    procedure: document.getElementById('procedureType').value
+                };
+                
+                fetch('/save_patient', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(patientData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('Patient information saved successfully', 'success');
+                    } else {
+                        showAlert('Error saving patient information', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('Error communicating with server', 'danger');
+                });
+            });
+            
+            // Save notes
+            document.getElementById('saveNotesBtn').addEventListener('click', function() {
+                const notes = document.getElementById('procedureNotes').value;
+                
+                fetch('/save_notes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({notes: notes})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('Notes saved successfully', 'success');
+                    } else {
+                        showAlert('Error saving notes', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('Error communicating with server', 'danger');
+                });
+            });
+            
+            // Clear notes
+            document.getElementById('clearNotesBtn').addEventListener('click', function() {
+                document.getElementById('procedureNotes').value = '';
+                showAlert('Notes cleared', 'info');
+            });
+            
+            // Handle zoom in/out
+            document.getElementById('zoomInBtn').addEventListener('click', function() {
+                fetch('/zoom', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({action: 'in'})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('Zoomed in', 'info');
+                    }
+                });
+            });
+            
+            document.getElementById('zoomOutBtn').addEventListener('click', function() {
+                fetch('/zoom', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({action: 'out'})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('Zoomed out', 'info');
+                    }
+                });
+            });
+            
+            // Rotate image
+            document.getElementById('rotateBtn').addEventListener('click', function() {
+                fetch('/rotate', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('Image rotated', 'info');
+                    }
+                });
+            });
+            
+            // Dark mode toggle
+            document.getElementById('darkModeToggle').addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                
+                if (document.body.classList.contains('dark-mode')) {
+                    this.innerHTML = '<i class="fas fa-sun me-2"></i>Light Mode';
+                    localStorage.setItem('darkMode', 'enabled');
+                } else {
+                    this.innerHTML = '<i class="fas fa-moon me-2"></i>Dark Mode';
+                    localStorage.setItem('darkMode', 'disabled');
+                }
+            });
+            
+            // Check for saved dark mode preference
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-sun me-2"></i>Light Mode';
+            }
+            
+            // Handle fullscreen
+            document.getElementById('fullscreenBtn').addEventListener('click', function() {
+                const videoContainer = document.querySelector('.video-container');
+                
+                if (!document.fullscreenElement) {
+                    if (videoContainer.requestFullscreen) {
+                        videoContainer.requestFullscreen();
+                    } else if (videoContainer.webkitRequestFullscreen) {
+                        videoContainer.webkitRequestFullscreen();
+                    } else if (videoContainer.msRequestFullscreen) {
+                        videoContainer.msRequestFullscreen();
+                    }
+                    this.innerHTML = '<i class="fas fa-compress"></i>';
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                    this.innerHTML = '<i class="fas fa-expand"></i>';
+                }
+            });
+            
+            // Event listener for fullscreen change
+            document.addEventListener('fullscreenchange', function() {
+                const fullscreenBtn = document.getElementById('fullscreenBtn');
+                if (!document.fullscreenElement) {
+                    fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+                } else {
+                    fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+                }
+            });
+            
+            // Handle system shutdown
+            document.getElementById('shutdownBtn').addEventListener('click', function() {
+                if (confirm('Are you sure you want to shut down the system?')) {
+                    fetch('/shutdown', {
+                        method: 'POST'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showAlert('System is shutting down...', 'warning');
+                        } else {
+                            showAlert('Error shutting down system', 'danger');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('Error communicating with server', 'danger');
+                    });
+                }
+            });
+            
+            // Load gallery and update camera info on page load
+            loadImageGallery();
+            updateCameraInfo();
+            updateCaptureCounter();
+        });
+    </script>
+</body>
+</html>
