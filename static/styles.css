@@ -19,6 +19,7 @@
   padding: 15px;
   border-radius: 10px;
   margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .video-overlay {
@@ -39,22 +40,84 @@
   color: #0d6efd;
 }
 
+/* Video container enhancements */
+.video-container {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  aspect-ratio: 16 / 9; /* Match camera aspect ratio (16:9) */
+  width: 100%;
+}
+
+.video-container:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.video-stream {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Prevent stretching, maintain aspect ratio */
+  display: block;
+  border-radius: 10px;
+}
+
+.video-controls {
+  transition: opacity 0.3s ease;
+  opacity: 0.9;
+}
+
+.video-container:hover .video-controls {
+  opacity: 1;
+}
+
+/* Enhanced button styles */
+.btn {
+  transition: all 0.2s ease;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-danger {
+  background: linear-gradient(to right, #dc3545, #c82333);
+  border: none;
+}
+
+.btn-primary {
+  background: linear-gradient(to right, #0d6efd, #0a58ca);
+  border: none;
+}
+
 /* Gallery improvements */
 .gallery-container {
   background-color: #f8f9fa;
   border-radius: 10px;
-  padding: 15px;
+  padding: 20px;
   margin-top: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
 .image-card {
   transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 15px;
 }
 
 .image-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .card-overlay {
@@ -64,8 +127,8 @@
   right: 0;
   background: rgba(0, 0, 0, 0.7);
   color: white;
-  padding: 5px;
-  font-size: 0.8rem;
+  padding: 8px;
+  font-size: 0.85rem;
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -76,17 +139,70 @@
 
 /* Modal customization */
 .modal-vein-finder .modal-header {
-  background-color: #0d6efd;
+  background: linear-gradient(to right, #0d6efd, #0a58ca);
   color: white;
+  border-radius: 10px 10px 0 0;
+}
+
+.modal-vein-finder .modal-content {
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .metadata-container {
   max-height: 300px;
   overflow-y: auto;
   background-color: #f8f9fa;
-  border-radius: 5px;
-  padding: 10px;
+  border-radius: 8px;
+  padding: 15px;
   margin-top: 15px;
+  font-size: 0.9rem;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+}
+
+/* Settings panel */
+.settings-card {
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.settings-card:hover {
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+}
+
+.settings-header {
+  background: linear-gradient(to right, #0d6efd, #0a58ca);
+  color: white;
+  padding: 15px;
+  font-weight: 600;
+}
+
+.settings-body {
+  background-color: #f8f9fa;
+  padding: 20px;
+}
+
+/* Form controls */
+.form-control, .form-select {
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  box-shadow: none;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.2);
+}
+
+.form-range::-webkit-slider-thumb {
+  background: #0d6efd;
+}
+
+.form-range::-moz-range-thumb {
+  background: #0d6efd;
 }
 
 /* Responsive adjustments */
@@ -102,30 +218,215 @@
 
 /* Dark mode */
 .dark-mode {
-  background-color: #212529;
-  color: #f8f9fa;
+  background-color: #121212;
+  color: #f0f0f0; /* Increased text contrast from #e0e0e0 */
 }
 
 .dark-mode .main-container {
-  background-color: #343a40;
-  color: #f8f9fa;
+  background-color: #1e1e1e;
+  color: #f0f0f0; /* Improved text contrast */
 }
 
 .dark-mode .settings-container {
-  background-color: #495057;
-  color: #f8f9fa;
+  background-color: #252525; /* Slightly lighter for better contrast */
+  color: #f0f0f0;
 }
 
 .dark-mode .form-control,
 .dark-mode .form-select {
-  background-color: #6c757d;
-  color: #f8f9fa;
-  border-color: #495057;
+  background-color: #333333; /* Lighter background for form controls */
+  color: #ffffff; /* Bright white text for forms */
+  border-color: #505050; /* Lighter border for better definition */
+}
+
+.dark-mode .form-control::placeholder {
+  color: #bbbbbb; /* More visible placeholder text */
 }
 
 .dark-mode .card {
+  background-color: #252525; /* Lighter card background */
+  color: #f0f0f0;
+  border-color: #505050; /* More visible border */
+}
+
+.dark-mode .card-header {
+  background-color: #1f1f1f;
+  color: #ffffff; /* Bright white for headers for better readability */
+  border-bottom-color: #505050;
+}
+
+.dark-mode .settings-title {
+  color: #5b9efa; /* Brighter blue for better visibility */
+  border-bottom: 2px solid #5b9efa;
+}
+
+.dark-mode .alert {
+  background-color: #252525;
+  color: #ffffff;
+  border-color: #505050;
+}
+
+.dark-mode .alert-success {
+  background-color: rgba(40, 167, 69, 0.3); /* More opacity for better contrast */
+  color: #a1f5b4; /* Brighter text color for better visibility */
+  border-color: #28a745;
+}
+
+.dark-mode .alert-danger {
+  background-color: rgba(220, 53, 69, 0.3); /* More opacity for better contrast */
+  color: #ffa5ad; /* Brighter text color for better visibility */
+  border-color: #dc3545;
+}
+
+.dark-mode .btn-light {
+  background-color: #4d4d4d;
+  color: #f0f0f0;
+  border-color: #6c6c6c;
+}
+
+.dark-mode .btn-outline-secondary {
+  color: #d0d0d0; /* Much brighter text for buttons in dark mode */
+  border-color: #6c6c6c;
+}
+
+.dark-mode .btn-outline-secondary:hover {
+  background-color: #4d4d4d;
+  color: #ffffff; /* Bright white for hover state */
+}
+
+.dark-mode .modal-content {
+  background-color: #252525;
+  color: #f0f0f0;
+  border-color: #505050;
+}
+
+.dark-mode .modal-header {
+  border-bottom-color: #505050;
+  background: linear-gradient(to right, #094cb1, #0a58ca); /* Darker blue gradient */
+}
+
+.dark-mode .modal-footer {
+  border-top-color: #505050;
+}
+
+.dark-mode .close {
+  color: #f0f0f0;
+}
+
+.dark-mode .table {
+  color: #f0f0f0;
+  border-color: #505050;
+}
+
+.dark-mode .text-muted {
+  color: #c0c0c0 !important; /* Much brighter muted text for better visibility */
+}
+
+.dark-mode .notes-section textarea {
+  background-color: #333333;
+  color: #ffffff;
+  border-color: #505050;
+}
+
+.dark-mode .settings-header {
+  background: linear-gradient(to right, #0d47a1, #0a58ca);
+  color: white;
+}
+
+.dark-mode .settings-body {
+  background-color: #252525;
+  color: #f0f0f0;
+}
+
+.dark-mode .settings-card {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .gallery-container {
+  background-color: #252525;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .metadata-container {
+  background-color: #1f1f1f; /* Darker background for metadata */
+  color: #f0f0f0;
+  border: 1px solid #505050; /* Add visible border */
+}
+
+/* Ensure controls have sufficient contrast in dark mode */
+.dark-mode .form-label {
+  color: #f0f0f0; /* Ensure labels are visible */
+}
+
+.dark-mode .form-check-label {
+  color: #f0f0f0; /* Ensure checkbox labels are visible */
+}
+
+/* Improve dropdown visibility in dark mode */
+.dark-mode .dropdown-menu {
+  background-color: #252525;
+  color: #f0f0f0;
+  border-color: #505050;
+}
+
+.dark-mode .dropdown-item {
+  color: #f0f0f0;
+}
+
+.dark-mode .dropdown-item:hover, .dark-mode .dropdown-item:focus {
+  background-color: #333333;
+  color: #ffffff;
+}
+
+/* Improve slider track visibility */
+.dark-mode .form-range::-webkit-slider-runnable-track {
+  background-color: #505050;
+}
+
+.dark-mode .form-range::-moz-range-track {
+  background-color: #505050;
+}
+
+/* High contrast selection styles for dark mode */
+.dark-mode ::selection {
+  background-color: #0d6efd;
+  color: white;
+}
+
+/* Card highlight effects for dark mode */
+.dark-mode .image-card {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+  border: 1px solid #505050;
+}
+
+.dark-mode .image-card:hover {
+  box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4);
+  border-color: #0d6efd;
+}
+
+.dark-mode .video-container {
+  border: 1px solid #505050;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Improve button visibility */
+.dark-mode .btn-primary {
+  background: linear-gradient(to right, #1a75ff, #0a58ca);
+  border: none;
+}
+
+.dark-mode .btn-secondary {
   background-color: #495057;
-  color: #f8f9fa;
+  border-color: #6c757d;
+  color: #ffffff;
+}
+
+/* Add a subtle highlight to focused elements for better UX */
+.dark-mode .form-control:focus, 
+.dark-mode .form-select:focus,
+.dark-mode .btn:focus {
+  box-shadow: 0 0 0 0.25rem rgba(49, 132, 253, 0.5);
+  border-color: #1a75ff;
 }
 
 /* Animations */
@@ -151,4 +452,4 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-} 
+}
