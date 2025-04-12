@@ -49,7 +49,7 @@ This project creates a vein imaging system using near-infrared (NIR) light to im
 
 1. Clone this repository:
    ```
-   git clone https://github.com/yourusername/vein-finder.git
+   git clone https://github.com/zainulnazir/vein-finder.git
    cd vein-finder
    ```
 
