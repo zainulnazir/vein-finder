@@ -50,7 +50,7 @@
         .video-container {
             position: relative;
             width: 100%;
-            aspect-ratio: 16 / 9;
+            aspect-ratio: 4 / 3;
             background-color: #000;
             border-radius: 8px;
             overflow: hidden;
@@ -243,43 +243,157 @@
 
         /* Dark mode styles */
         .dark-mode {
-            background-color: #212529;
-            color: #f8f9fa;
+            background-color: #121212;
+            color: #f0f0f0;
         }
 
         .dark-mode .main-container {
-            background-color: #343a40;
-            color: #f8f9fa;
+            background-color: #1e1e1e;
+            color: #f0f0f0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
         .dark-mode .settings-body {
-            background-color: #495057;
-            color: #f8f9fa;
+            background-color: #2d2d2d;
+            color: #f0f0f0;
         }
 
         .dark-mode .gallery-container {
-            background-color: #343a40;
+            background-color: #1e1e1e;
         }
 
         .dark-mode .stat-card {
-            background-color: #343a40;
-            color: #f8f9fa;
+            background-color: #2d2d2d;
+            color: #f0f0f0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .dark-mode .image-card {
+            background-color: #2d2d2d;
+            border-color: #3d3d3d;
+        }
+
+        .dark-mode .card {
+            background-color: #2d2d2d;
+            border-color: #3d3d3d;
+        }
+
+        .dark-mode .card-header {
+            background-color: #1e1e1e;
+            border-bottom-color: #3d3d3d;
+        }
+
+        .dark-mode .card-footer {
+            background-color: #1e1e1e;
+            border-top-color: #3d3d3d;
         }
 
         .dark-mode .form-control,
         .dark-mode .form-select {
-            background-color: #495057;
-            color: #f8f9fa;
-            border-color: #6c757d;
+            background-color: #2d2d2d;
+            color: #f0f0f0;
+            border-color: #444;
+        }
+
+        .dark-mode .form-control:focus,
+        .dark-mode .form-select:focus {
+            background-color: #333;
+            color: #fff;
+            border-color: #0d6efd;
         }
 
         .dark-mode .modal-content {
-            background-color: #343a40;
-            color: #f8f9fa;
+            background-color: #1e1e1e;
+            color: #f0f0f0;
+            border-color: #444;
+        }
+
+        .dark-mode .modal-header,
+        .dark-mode .modal-footer {
+            border-color: #444;
+            background-color: #2d2d2d;
         }
 
         .dark-mode .btn-close {
             filter: invert(1) grayscale(100%) brightness(200%);
+        }
+
+        .dark-mode .table {
+            color: #f0f0f0;
+        }
+
+        .dark-mode .text-muted {
+            color: #aaaaaa !important;
+        }
+
+        .dark-mode .alert {
+            background-color: #2d2d2d;
+            color: #f0f0f0;
+            border-color: #444;
+        }
+
+        .dark-mode .alert-success {
+            background-color: rgba(25, 135, 84, 0.2);
+            color: #75b798;
+            border-color: rgba(25, 135, 84, 0.4);
+        }
+
+        .dark-mode .alert-info {
+            background-color: rgba(13, 202, 240, 0.2);
+            color: #6edff6;
+            border-color: rgba(13, 202, 240, 0.4);
+        }
+
+        .dark-mode .alert-warning {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #ffda6a;
+            border-color: rgba(255, 193, 7, 0.4);
+        }
+
+        .dark-mode .alert-danger {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #ea868f;
+            border-color: rgba(220, 53, 69, 0.4);
+        }
+
+        .dark-mode .notes-section,
+        .dark-mode .patient-info,
+        .dark-mode .settings-card {
+            background-color: #2d2d2d;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .dark-mode .btn-outline-secondary {
+            color: #adb5bd;
+            border-color: #adb5bd;
+        }
+
+        .dark-mode .btn-outline-light {
+            color: #f0f0f0;
+            border-color: #f0f0f0;
+        }
+
+        .dark-mode hr {
+            border-color: #444;
+        }
+
+        .dark-mode .accordion-button {
+            background-color: #2d2d2d;
+            color: #f0f0f0;
+        }
+
+        .dark-mode .accordion-button:not(.collapsed) {
+            background-color: #3d3d3d;
+            color: #f0f0f0;
+        }
+
+        .dark-mode .accordion-item {
+            background-color: #2d2d2d;
+            border-color: #444;
+        }
+
+        .dark-mode .accordion-body {
+            background-color: #1e1e1e;
         }
     </style>
 </head>
@@ -361,6 +475,7 @@
                             <i class="fas fa-circle text-danger me-1"></i> LIVE
                             <span class="ms-2" id="exposureInfo">Exp: {{ settings.camera_exposure }}μs</span>
                             <span class="ms-2" id="gainInfo">Gain: {{ settings.camera_gain }}</span>
+                            <span class="ms-2" id="zoomInfo">Zoom: 1.0x</span>
                         </div>
                         <img src="{{ url_for('video_feed') }}" class="video-stream">
                         <div class="video-controls">
@@ -369,30 +484,98 @@
                                 <span id="captureSpinner" class="spinner-border spinner-border-sm d-none" role="status"
                                     aria-hidden="true"></span>
                             </button>
-                            <button id="zoomInBtn" class="btn btn-light">
+                            <button id="zoomInBtn" class="btn btn-light" title="Zoom In (+ key)">
                                 <i class="fas fa-search-plus"></i>
                             </button>
-                            <button id="zoomOutBtn" class="btn btn-light">
+                            <button id="zoomOutBtn" class="btn btn-light" title="Zoom Out (- key)">
                                 <i class="fas fa-search-minus"></i>
                             </button>
-                            <button id="rotateBtn" class="btn btn-light">
+                            <button id="rotateBtn" class="btn btn-light" title="Rotate (R key)">
                                 <i class="fas fa-sync-alt"></i>
                             </button>
-                            <button id="fullscreenBtn" class="btn btn-light">
+                            <button id="fullscreenBtn" class="btn btn-light" title="Fullscreen (F key)">
                                 <i class="fas fa-expand"></i>
                             </button>
+                            <button id="compareBtn" class="btn btn-light" title="Compare Methods (C key)">
+                                <i class="fas fa-clone"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Method Comparison Container (hidden by default) -->
+                    <div id="comparisonContainer" class="mb-3 d-none">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Method Comparison</h5>
+                                <button type="button" class="btn-close" id="closeComparisonBtn"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="comparison-method-card">
+                                            <h6 class="text-center">Adaptive</h6>
+                                            <div class="comparison-img-container">
+                                                <img id="compareAdaptive" class="img-fluid comparison-img"
+                                                    src="{{ url_for('static', filename='images/placeholder.jpg') }}"
+                                                    alt="Adaptive Method">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="comparison-method-card">
+                                            <h6 class="text-center">Frangi</h6>
+                                            <div class="comparison-img-container">
+                                                <img id="compareFrangi" class="img-fluid comparison-img"
+                                                    src="{{ url_for('static', filename='images/placeholder.jpg') }}"
+                                                    alt="Frangi Method">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="comparison-method-card">
+                                            <h6 class="text-center">Laplacian</h6>
+                                            <div class="comparison-img-container">
+                                                <img id="compareLaplacian" class="img-fluid comparison-img"
+                                                    src="{{ url_for('static', filename='images/placeholder.jpg') }}"
+                                                    alt="Laplacian Method">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <button id="refreshComparisonBtn" class="btn btn-primary">
+                                        <i class="fas fa-sync-alt me-2"></i>Refresh Comparison
+                                    </button>
+                                    <span class="ms-3 text-muted">Compare different vein detection methods
+                                        side-by-side</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Last Captured Image -->
                     <div id="lastCapturedContainer" class="mb-3 d-none">
                         <div class="card">
-                            <div class="card-header">
+                            <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0">Last Captured Image</h5>
+                                <button type="button" class="btn-close" id="closeLastCapturedBtn"
+                                    aria-label="Close"></button>
                             </div>
                             <div class="card-body text-center">
-                                <img id="lastCapturedImg" class="img-fluid"
-                                    style="max-height: 200px; width: auto; object-fit: contain;">
+                                <div class="position-relative">
+                                    <img id="lastCapturedImg" class="img-fluid"
+                                        style="max-height: 300px; width: auto; object-fit: contain;">
+                                    <div
+                                        class="image-controls position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 p-2">
+                                        <div class="btn-group">
+                                            <button id="toggleOriginalBtn" class="btn btn-sm btn-outline-light">Show
+                                                Original</button>
+                                            <button id="toggleProcessedBtn"
+                                                class="btn btn-sm btn-outline-light active">Show Processed</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -449,30 +632,27 @@
                                 <div class="mb-3">
                                     <label for="detectionMethod" class="form-label">Vein Detection Method</label>
                                     <select id="detectionMethod" class="form-select">
-                                        <option value="adaptive" {% if settings.detection_method=='adaptive'
-                                            %}selected{% endif %}>Adaptive Threshold</option>
-                                        <option value="frangi" {% if settings.detection_method=='frangi' %}selected{%
-                                            endif %}>Frangi Filter</option>
-                                        <option value="laplacian" {% if settings.detection_method=='laplacian'
-                                            %}selected{% endif %}>Laplacian</option>
-                                        <option value="thermal" {% if settings.detection_method=='thermal' %}selected{%
-                                            endif %}>Thermal</option>
-                                        <option value="none" {% if settings.detection_method=='none' %}selected{% endif
-                                            %}>None (Raw)</option>
+                                        <option value="adaptive">Adaptive Threshold</option>
+                                        <option value="frangi">Frangi Filter</option>
+                                        <option value="laplacian">Laplacian</option>
+                                        <option value="none">No Detection (Raw)</option>
                                     </select>
+                                    <small class="form-text text-muted">Press 1-4 to switch methods</small>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="contrastMethod" class="form-label">Contrast Enhancement</label>
-                                    <select id="contrastMethod" class="form-select">
-                                        <option value="clahe" {% if settings.contrast_method=='clahe' %}selected{% endif
-                                            %}>CLAHE</option>
-                                        <option value="histogram_equalization" {% if
-                                            settings.contrast_method=='histogram_equalization' %}selected{% endif %}>
-                                            Histogram Equalization</option>
-                                        <option value="none" {% if settings.contrast_method=='none' %}selected{% endif
-                                            %}>None</option>
-                                    </select>
+                                    <label for="claheClipLimit" class="form-label">CLAHE Clip Limit: <span
+                                            id="clipLimitValue">{{ settings.clahe_clip_limit }}</span></label>
+                                    <input type="range" class="form-range" id="claheClipLimit" min="1" max="10"
+                                        step="0.5" value="{{ settings.clahe_clip_limit }}">
+                                    <small class="form-text text-muted">Adjusts contrast enhancement strength</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="claheTileSize" class="form-label">CLAHE Tile Size: <span
+                                            id="tileSizeValue">{{ settings.clahe_tile_grid_size }}</span></label>
+                                    <input type="range" class="form-range" id="claheTileSize" min="2" max="16" step="2"
+                                        value="{{ settings.clahe_tile_grid_size }}">
                                 </div>
 
                                 <div class="mb-3">
@@ -536,7 +716,7 @@
 
                             <div class="d-grid gap-2">
                                 <button id="toggleLEDs" class="btn btn-primary">
-                                    <i class="fas fa-power-off me-2"></i>Toggle LEDs
+                                    <i class="fas fa-power-off me-2"></i>Toggle LEDs (L key)
                                 </button>
                                 <button id="applyLEDSettings" class="btn btn-outline-primary">
                                     <i class="fas fa-save me-2"></i>Apply LED Settings
@@ -556,6 +736,11 @@
                                     <label for="patientName" class="form-label">Patient Name</label>
                                     <input type="text" class="form-control" id="patientName"
                                         placeholder="Enter patient name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="patientId" class="form-label">Patient ID</label>
+                                    <input type="text" class="form-control" id="patientId"
+                                        placeholder="Enter patient ID">
                                 </div>
                                 <div class="mb-3">
                                     <label for="patientAge" class="form-label">Age</label>
@@ -593,6 +778,39 @@
                 </div>
             </div>
 
+            <!-- Gallery Pagination -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" id="gallerySearch" class="form-control"
+                            placeholder="Search by date or info...">
+                        <button class="btn btn-outline-secondary" type="button" id="gallerySearchBtn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="float-end">
+                        <div class="btn-group">
+                            <button class="btn btn-outline-primary btn-sm" id="paginationPrev">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span class="btn btn-outline-secondary btn-sm disabled" id="paginationInfo">Page 1 of
+                                1</span>
+                            <button class="btn btn-outline-primary btn-sm" id="paginationNext">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <select class="form-select form-select-sm d-inline-block w-auto ms-2" id="galleryPageSize">
+                            <option value="12">12 per page</option>
+                            <option value="24">24 per page</option>
+                            <option value="48">48 per page</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gallery Images -->
             <div class="row" id="imageGallery">
                 <div class="col-12 text-center py-5">
                     <div class="spinner-border text-primary" role="status">
@@ -601,11 +819,14 @@
                     <p class="mt-2">Loading saved images...</p>
                 </div>
             </div>
+
+            <!-- Gallery Pagination Controls -->
+            <div class="d-flex justify-content-center mt-3" id="galleryPagination"></div>
         </div>
 
         <footer class="text-center text-muted mt-4">
             <p>VeinVision Pro | Advanced Medical Imaging System for Venipuncture Assistance</p>
-            <p class="small">System Version 1.0 | <a href="#" data-bs-toggle="modal"
+            <p class="small">System Version 1.1 | <a href="#" data-bs-toggle="modal"
                     data-bs-target="#aboutModal">About</a></p>
         </footer>
     </div>
@@ -661,7 +882,6 @@
                             <li>Adaptive Threshold: Best for general use</li>
                             <li>Frangi Filter: Optimized for thin veins</li>
                             <li>Laplacian: Good for high contrast</li>
-                            <li>Thermal Visualization: Heat map visualization</li>
                         </ul>
                     </div>
                 </div>
@@ -730,7 +950,6 @@
                                         <li><strong>Frangi Filter:</strong> Best for visualizing fine vein structures
                                         </li>
                                         <li><strong>Laplacian:</strong> Good for highlighting edges of veins</li>
-                                        <li><strong>Thermal:</strong> Provides a heat-map style visualization</li>
                                     </ul>
 
                                     <h6>Image Controls</h6>
@@ -955,6 +1174,50 @@
                 </div>
                 <div class="modal-body text-center">
                     <img id="modalImage" class="img-fluid modal-image" alt="Captured image">
+
+                    <!-- Image metadata -->
+                    <div class="metadata-container mt-3">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Image Information</h6>
+                                <table class="table table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <th>Timestamp</th>
+                                            <td id="modalTimestamp">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Detection Method</th>
+                                            <td id="modalDetectionMethod">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Resolution</th>
+                                            <td id="modalResolution">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Patient Information</h6>
+                                <table class="table table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <th>Name</th>
+                                            <td id="modalPatientName">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>ID</th>
+                                            <td id="modalPatientId">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Procedure</th>
+                                            <td id="modalProcedure">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer justify-content-between">
                     <div class="btn-group" role="group">
@@ -963,9 +1226,109 @@
                         <button type="button" id="modalViewOriginal" class="btn btn-outline-primary"
                             data-src="">Original</button>
                     </div>
-                    <button type="button" id="modalDownload" class="btn btn-success" data-src="">
-                        <i class="fas fa-download me-1"></i>Download
-                    </button>
+                    <div>
+                        <button type="button" id="modalPrintBtn" class="btn btn-secondary">
+                            <i class="fas fa-print me-1"></i>Print
+                        </button>
+                        <button type="button" id="modalDownload" class="btn btn-success" data-src="">
+                            <i class="fas fa-download me-1"></i>Download
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calibration Wizard Modal -->
+    <div class="modal fade" id="calibrationModal" tabindex="-1" aria-labelledby="calibrationModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="calibrationModalLabel">Camera Calibration Wizard</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="calibrationStep1" class="calibration-step">
+                        <h5>Step 1: Positioning</h5>
+                        <p>Position the device 10-15cm from the skin surface in a dimly lit room.</p>
+                        <img src="{{ url_for('static', filename='images/position_guide.jpg') }}" class="img-fluid mb-3"
+                            alt="Positioning guide">
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" style="width: 25%" aria-valuenow="25"
+                                aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <button class="btn btn-primary next-cal-step" data-next="calibrationStep2">Next</button>
+                    </div>
+
+                    <div id="calibrationStep2" class="calibration-step d-none">
+                        <h5>Step 2: Lighting Adjustment</h5>
+                        <p>Adjust the LED brightness for optimal vein visibility.</p>
+                        <div class="mb-3">
+                            <label for="calLedBrightness" class="form-label">LED Brightness</label>
+                            <input type="range" class="form-range" id="calLedBrightness" min="0" max="255" value="128">
+                        </div>
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" style="width: 50%" aria-valuenow="50"
+                                aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <button class="btn btn-secondary prev-cal-step" data-prev="calibrationStep1">Previous</button>
+                        <button class="btn btn-primary next-cal-step" data-next="calibrationStep3">Next</button>
+                    </div>
+
+                    <div id="calibrationStep3" class="calibration-step d-none">
+                        <h5>Step 3: Camera Settings</h5>
+                        <p>Adjust exposure and gain for the clearest image.</p>
+                        <div class="mb-3">
+                            <label for="calExposure" class="form-label">Exposure</label>
+                            <input type="range" class="form-range" id="calExposure" min="1000" max="100000" step="1000"
+                                value="20000">
+                        </div>
+                        <div class="mb-3">
+                            <label for="calGain" class="form-label">Gain</label>
+                            <input type="range" class="form-range" id="calGain" min="1" max="16" step="0.5" value="8">
+                        </div>
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" style="width: 75%" aria-valuenow="75"
+                                aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <button class="btn btn-secondary prev-cal-step" data-prev="calibrationStep2">Previous</button>
+                        <button class="btn btn-primary next-cal-step" data-next="calibrationStep4">Next</button>
+                    </div>
+
+                    <div id="calibrationStep4" class="calibration-step d-none">
+                        <h5>Step 4: Detection Method</h5>
+                        <p>Select the best detection method for the current patient.</p>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="calDetectionMethod" id="calAdaptive"
+                                    value="adaptive" checked>
+                                <label class="form-check-label" for="calAdaptive">
+                                    Adaptive (recommended for medium skin tones)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="calDetectionMethod" id="calFrangi"
+                                    value="frangi">
+                                <label class="form-check-label" for="calFrangi">
+                                    Frangi (best for visualizing fine veins)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="calDetectionMethod" id="calLaplacian"
+                                    value="laplacian">
+                                <label class="form-check-label" for="calLaplacian">
+                                    Laplacian (best for edges and high contrast)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" style="width: 100%" aria-valuenow="100"
+                                aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <button class="btn btn-secondary prev-cal-step" data-prev="calibrationStep3">Previous</button>
+                        <button class="btn btn-success" id="finishCalibration">Finish Calibration</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -976,858 +1339,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Custom JavaScript -->
-    <script>
-        $(document).ready(function () {
-            // Initialize Bootstrap modals
-            const modals = document.querySelectorAll('.modal');
-            modals.forEach(modalEl => {
-                new bootstrap.Modal(modalEl);
-            });
-
-            // Common variables
-            const settings = {
-                detection_method: 'vein',
-                contrast_method: 'clahe',
-                led_brightness: 50,
-                led_pattern: 1,
-                camera_exposure: 20000,
-                camera_gain: 10
-            };
-
-            // Load settings initially
-            fetch('/get_settings')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Object.assign(settings, data.settings);
-
-                        // Update UI controls
-                        document.getElementById('detectionMethod').value = settings.detection_method;
-                        document.getElementById('contrastMethod').value = settings.contrast_method;
-                        document.getElementById('ledBrightness').value = settings.led_brightness;
-                        document.getElementById('ledPattern').value = settings.led_pattern;
-                        document.getElementById('cameraExposure').value = settings.camera_exposure;
-                        document.getElementById('cameraGain').value = settings.camera_gain;
-
-                        // Update displayed values
-                        document.getElementById('brightnessValue').textContent = settings.led_brightness;
-                        document.getElementById('exposureValue').textContent = settings.camera_exposure;
-                        document.getElementById('gainValue').textContent = settings.camera_gain;
-
-                        updateCameraInfo();
-                    }
-                });
-
-            // Initialize range sliders
-            const ledBrightness = document.getElementById('ledBrightness');
-            const brightnessValue = document.getElementById('brightnessValue');
-
-            ledBrightness.addEventListener('input', function () {
-                brightnessValue.textContent = this.value;
-            });
-
-            const cameraExposure = document.getElementById('cameraExposure');
-            const exposureValue = document.getElementById('exposureValue');
-
-            cameraExposure.addEventListener('input', function () {
-                exposureValue.textContent = this.value;
-            });
-
-            const cameraGain = document.getElementById('cameraGain');
-            const gainValue = document.getElementById('gainValue');
-
-            cameraGain.addEventListener('input', function () {
-                gainValue.textContent = this.value;
-            });
-
-            // Apply camera settings
-            document.getElementById('applyCameraSettings').addEventListener('click', function (e) {
-                e.preventDefault();
-                const updatedSettings = {
-                    camera_exposure: parseInt(cameraExposure.value),
-                    camera_gain: parseFloat(cameraGain.value),
-                    detection_method: document.getElementById('detectionMethod').value,
-                    contrast_method: document.getElementById('contrastMethod').value,
-                    stream_resolution: document.getElementById('streamResolution').value
-                };
-
-                Object.assign(settings, updatedSettings);
-
-                fetch('/update_settings', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(updatedSettings)
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showAlert('Camera settings updated successfully', 'success');
-                            updateCameraInfo();
-                        } else {
-                            showAlert('Error updating camera settings', 'danger');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showAlert('Error communicating with server', 'danger');
-                    });
-            });
-
-            // Stream resolution selector change event
-            document.getElementById('streamResolution').addEventListener('change', function () {
-                const newResolution = this.value;
-
-                // Show loading indicator
-                const videoStream = document.querySelector('.video-stream');
-                videoStream.style.opacity = '0.5';
-
-                fetch('/update_settings', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        stream_resolution: newResolution
-                    })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showAlert(`Stream resolution changed to ${newResolution}`, 'success');
-
-                            // Reload the video stream
-                            const videoSrc = videoStream.src;
-                            videoStream.src = '';
-                            setTimeout(() => {
-                                videoStream.src = videoSrc + '?t=' + new Date().getTime();
-                                videoStream.style.opacity = '1';
-                            }, 1000);
-
-                            // Update displayed settings
-                            settings.stream_resolution = newResolution;
-                        } else {
-                            showAlert('Error changing resolution', 'danger');
-                            videoStream.style.opacity = '1';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showAlert('Error communicating with server', 'danger');
-                        videoStream.style.opacity = '1';
-                    });
-            });
-
-            // Capture image function
-            document.getElementById('captureBtn').addEventListener('click', captureImage);
-
-            function captureImage() {
-                // Show loading indicator
-                const captureBtn = document.getElementById('captureBtn');
-                const captureSpinner = document.getElementById('captureSpinner');
-                const captureBtnText = document.getElementById('captureBtnText');
-
-                captureBtn.disabled = true;
-                captureSpinner.classList.remove('d-none');
-                captureBtnText.textContent = 'Processing...';
-
-                fetch('/capture', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        patient_info: {
-                            name: document.getElementById('patientName')?.value || 'unknown',
-                            age: document.getElementById('patientAge')?.value || '',
-                            procedure: document.getElementById('procedureType')?.value || ''
-                        },
-                        detection_method: settings.detection_method,
-                        contrast_method: settings.contrast_method
-                    })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        // Hide loading indicator
-                        captureBtn.disabled = false;
-                        captureSpinner.classList.add('d-none');
-                        captureBtnText.textContent = 'Capture';
-
-                        if (data.success) {
-                            showAlert('Image captured successfully', 'success');
-
-                            // Update the last captured image
-                            const lastCapturedImg = document.getElementById('lastCapturedImg');
-                            lastCapturedImg.src = data.processed_image + '?t=' + new Date().getTime();
-
-                            // Show the last captured image container
-                            document.getElementById('lastCapturedContainer').classList.remove('d-none');
-
-                            // Update captured image info
-                            const capturedImageInfo = document.getElementById('capturedImageInfo');
-                            capturedImageInfo.classList.remove('d-none');
-
-                            // Set timestamp
-                            const captureTimestamp = document.getElementById('captureTimestamp');
-                            try {
-                                const timestamp = data.timestamp;
-                                const date = new Date(timestamp.substring(0, 4),
-                                    parseInt(timestamp.substring(4, 6)) - 1,
-                                    timestamp.substring(6, 8),
-                                    timestamp.substring(9, 11),
-                                    timestamp.substring(11, 13),
-                                    timestamp.substring(13, 15));
-                                captureTimestamp.textContent = date.toLocaleString();
-                            } catch (e) {
-                                captureTimestamp.textContent = data.timestamp || 'Unknown';
-                            }
-
-                            // Set view buttons
-                            const viewOriginalBtn = document.getElementById('viewOriginalBtn');
-                            const viewProcessedBtn = document.getElementById('viewProcessedBtn');
-                            const downloadBtn = document.getElementById('downloadBtn');
-
-                            viewOriginalBtn.href = data.original_image;
-                            viewProcessedBtn.href = data.processed_image;
-                            downloadBtn.href = data.processed_image;
-                            downloadBtn.download = data.processed_image.split('/').pop();
-
-                            // Update counter
-                            updateCaptureCounter();
-
-                            // Refresh gallery
-                            loadImageGallery();
-                        } else {
-                            showAlert('Error capturing image: ' + data.message, 'danger');
-                        }
-                    })
-                    .catch(error => {
-                        // Hide loading indicator
-                        captureBtn.disabled = false;
-                        captureSpinner.classList.add('d-none');
-                        captureBtnText.textContent = 'Capture';
-
-                        console.error('Error:', error);
-                        showAlert('Error communicating with server', 'danger');
-                    });
-            }
-
-            // Load image gallery
-            function loadImageGallery() {
-                const galleryContainer = document.getElementById('imageGallery');
-
-                // Show loading spinner
-                galleryContainer.innerHTML = `
-                    <div class="col-12 text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2">Loading saved images...</p>
-                    </div>
-                `;
-
-                // Add cache-busting parameter to avoid cached responses
-                const cacheBuster = new Date().getTime();
-                fetch(`/images?_=${cacheBuster}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success && data.images && data.images.length > 0) {
-                            console.log(`Found ${data.images.length} images`);
-                            let galleryHTML = '';
-
-                            data.images.forEach(image => {
-                                const timestamp = image.timestamp;
-                                let formattedDate = '';
-                                try {
-                                    // Parse timestamp format: YYYYMMDD_HHMMSS
-                                    const year = timestamp.substring(0, 4);
-                                    const month = parseInt(timestamp.substring(4, 6)) - 1; // JS months are 0-based
-                                    const day = timestamp.substring(6, 8);
-                                    const hour = timestamp.substring(9, 11);
-                                    const minute = timestamp.substring(11, 13);
-                                    const second = timestamp.substring(13, 15);
-
-                                    const date = new Date(year, month, day, hour, minute, second);
-                                    formattedDate = date.toLocaleString();
-                                } catch (e) {
-                                    console.error("Error parsing date:", e);
-                                    formattedDate = timestamp || 'Unknown';
-                                }
-
-                                // Add cache-busting parameter to image URLs
-                                const processedImage = `${image.processed_image}?t=${cacheBuster}`;
-                                const originalImage = `${image.original_image}?t=${cacheBuster}`;
-
-                                galleryHTML += `
-                                <div class="col-md-4 col-sm-6 mb-4">
-                                    <div class="card image-card h-100">
-                                        <div class="position-relative">
-                                            <img src="${processedImage}" 
-                                                 class="card-img-top gallery-image" 
-                                                 alt="Captured Image"
-                                                 data-img-src="${image.processed_image}"
-                                                 data-orig-src="${image.original_image}"
-                                                 data-timestamp="${timestamp}">
-                                            <div class="card-overlay">
-                                                <small>${formattedDate}</small>
-                                            </div>
-                                        </div>
-                                        <div class="card-footer d-flex justify-content-between">
-                                            <button class="btn btn-sm btn-primary view-image-btn" 
-                                                    data-processed-src="${image.processed_image}" 
-                                                    data-original-src="${image.original_image}" 
-                                                    data-timestamp="${timestamp}">
-                                                <i class="fas fa-eye me-1"></i>View
-                                            </button>
-                                            <button class="btn btn-sm btn-danger delete-image-btn" 
-                                                    data-image-path="${image.processed_image}">
-                                                <i class="fas fa-trash me-1"></i>Delete
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                            });
-
-                            galleryContainer.innerHTML = galleryHTML;
-
-                            // Add event listeners to view buttons
-                            document.querySelectorAll('.view-image-btn').forEach(button => {
-                                button.addEventListener('click', function () {
-                                    const processedSrc = this.getAttribute('data-processed-src');
-                                    const originalSrc = this.getAttribute('data-original-src');
-                                    const timestamp = this.getAttribute('data-timestamp');
-
-                                    // Set image source in modal with cache-buster
-                                    document.getElementById('modalImage').src = processedSrc + '?t=' + new Date().getTime();
-
-                                    // Update toggle buttons
-                                    const viewOriginalBtn = document.getElementById('modalViewOriginal');
-                                    const viewProcessedBtn = document.getElementById('modalViewProcessed');
-
-                                    viewOriginalBtn.setAttribute('data-src', originalSrc);
-                                    viewProcessedBtn.setAttribute('data-src', processedSrc);
-
-                                    // Set active state
-                                    viewProcessedBtn.classList.add('active');
-                                    viewOriginalBtn.classList.remove('active');
-
-                                    // Set download link
-                                    document.getElementById('modalDownload').setAttribute('data-src', processedSrc);
-
-                                    // Show the modal
-                                    const imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
-                                    imageModal.show();
-                                });
-                            });
-
-                            // Add event listeners to delete buttons
-                            document.querySelectorAll('.delete-image-btn').forEach(button => {
-                                button.addEventListener('click', function () {
-                                    const imagePath = this.getAttribute('data-image-path');
-                                    const imageCard = this.closest('.col-md-4');
-
-                                    if (confirm('Are you sure you want to delete this image?')) {
-                                        console.log('Sending delete request for:', imagePath);
-
-                                        fetch('/delete_image', {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'application/json'
-                                            },
-                                            body: JSON.stringify({ image_path: imagePath })
-                                        })
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                if (data.success) {
-                                                    // Remove the image card from the gallery
-                                                    imageCard.remove();
-                                                    showAlert('Image deleted successfully', 'success');
-                                                    updateCaptureCounter();
-
-                                                    console.log('Delete response:', data);
-                                                } else {
-                                                    showAlert('Error deleting image: ' + data.message, 'danger');
-                                                    console.error('Delete error:', data.message);
-                                                }
-                                            })
-                                            .catch(error => {
-                                                console.error('Error during delete request:', error);
-                                                showAlert('Error communicating with server', 'danger');
-                                            });
-                                    }
-                                });
-                            });
-
-                            // Make gallery images clickable to open modal
-                            document.querySelectorAll('.gallery-image').forEach(img => {
-                                img.addEventListener('click', function () {
-                                    const processedSrc = this.getAttribute('data-img-src');
-                                    const originalSrc = this.getAttribute('data-orig-src');
-                                    const timestamp = this.getAttribute('data-timestamp');
-
-                                    // Set image source in modal
-                                    document.getElementById('modalImage').src = processedSrc + '?t=' + new Date().getTime();
-
-                                    // Update toggle buttons
-                                    const viewOriginalBtn = document.getElementById('modalViewOriginal');
-                                    const viewProcessedBtn = document.getElementById('modalViewProcessed');
-
-                                    viewOriginalBtn.setAttribute('data-src', originalSrc);
-                                    viewProcessedBtn.setAttribute('data-src', processedSrc);
-
-                                    // Set active state
-                                    viewProcessedBtn.classList.add('active');
-                                    viewOriginalBtn.classList.remove('active');
-
-                                    // Set download link
-                                    document.getElementById('modalDownload').setAttribute('data-src', processedSrc);
-
-                                    // Show the modal
-                                    const imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
-                                    imageModal.show();
-                                });
-                            });
-                        } else {
-                            galleryContainer.innerHTML = `
-                            <div class="col-12 text-center py-5">
-                                <i class="fas fa-images fa-3x mb-3 text-muted"></i>
-                                <p>No images captured yet. Use the capture button to save images.</p>
-                            </div>
-                        `;
-                            console.log('No images found or empty response');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading gallery:', error);
-                        galleryContainer.innerHTML = `
-                        <div class="col-12 text-center py-5">
-                            <i class="fas fa-exclamation-triangle fa-3x mb-3 text-danger"></i>
-                            <p>Error loading gallery. Please try refreshing.</p>
-                            <p class="small text-muted">Error: ${error.message}</p>
-                        </div>
-                    `;
-                    });
-            }
-
-            // Handle image view toggles in modal
-            document.getElementById('modalViewOriginal').addEventListener('click', function () {
-                const src = this.getAttribute('data-src');
-                document.getElementById('modalImage').src = src + '?t=' + new Date().getTime();
-
-                // Update active state
-                this.classList.add('active');
-                document.getElementById('modalViewProcessed').classList.remove('active');
-
-                // Update download link
-                document.getElementById('modalDownload').setAttribute('data-src', src);
-            });
-
-            document.getElementById('modalViewProcessed').addEventListener('click', function () {
-                const src = this.getAttribute('data-src');
-                document.getElementById('modalImage').src = src + '?t=' + new Date().getTime();
-
-                // Update active state
-                this.classList.add('active');
-                document.getElementById('modalViewOriginal').classList.remove('active');
-
-                // Update download link
-                document.getElementById('modalDownload').setAttribute('data-src', src);
-            });
-
-            // Handle download button in modal
-            document.getElementById('modalDownload').addEventListener('click', function (e) {
-                e.preventDefault();
-                const imgSrc = this.getAttribute('data-src');
-
-                // Create a temporary link and trigger download
-                const link = document.createElement('a');
-                link.href = imgSrc;
-                link.download = imgSrc.split('/').pop();
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            });
-
-            // Show alert function
-            function showAlert(message, type) {
-                const alertDiv = document.createElement('div');
-                alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-                alertDiv.innerHTML = `
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                `;
-
-                document.querySelector('.container').prepend(alertDiv);
-
-                // Auto-dismiss after 5 seconds
-                setTimeout(() => {
-                    // Bootstrap 5 way of removing the alert
-                    alertDiv.classList.remove('show');
-                    setTimeout(() => {
-                        alertDiv.remove();
-                    }, 150); // Wait for fade out animation
-                }, 5000);
-            }
-
-            // Update camera info based on settings
-            function updateCameraInfo() {
-                fetch('/camera_info')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Update exposure and gain info in the camera-info div
-                            document.getElementById('exposureInfo').textContent = `Exp: ${data.camera_info.exposure}μs`;
-                            document.getElementById('gainInfo').textContent = `Gain: ${data.camera_info.gain}`;
-
-                            // Update detection method display
-                            document.getElementById('detectionMethodDisplay').textContent = settings.detection_method;
-                        }
-                    });
-            }
-
-            // Hardware status monitoring
-            function updateHardwareStatus() {
-                fetch('/hardware_status')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Update camera status
-                            const cameraStatus = data.camera;
-                            const systemStatus = document.getElementById('systemStatus');
-                            const ledStatus = document.getElementById('ledStatus');
-
-                            if (cameraStatus.connected) {
-                                if (cameraStatus.simulation) {
-                                    systemStatus.textContent = 'Simulation Mode';
-                                    systemStatus.classList.add('text-warning');
-                                } else {
-                                    systemStatus.textContent = 'Online';
-                                    systemStatus.classList.remove('text-warning');
-                                }
-                            } else {
-                                systemStatus.textContent = 'Camera Offline';
-                                systemStatus.classList.add('text-danger');
-                            }
-
-                            // Update LED status
-                            if (data.led_controller.connected) {
-                                ledStatus.textContent = 'Connected';
-                                ledStatus.classList.remove('text-danger');
-                            } else {
-                                ledStatus.textContent = 'Disconnected';
-                                ledStatus.classList.add('text-danger');
-                            }
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error checking hardware status:', error);
-                        // If we can't connect, update the status
-                        const systemStatus = document.getElementById('systemStatus');
-                        systemStatus.textContent = 'Connection Error';
-                        systemStatus.classList.add('text-danger');
-                    });
-            }
-
-            // Check hardware status initially and then every 10 seconds
-            updateHardwareStatus();
-            setInterval(updateHardwareStatus, 10000);
-
-            // Update capture counter
-            function updateCaptureCounter() {
-                fetch('/image_count')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            document.getElementById('captureCounter').textContent = data.count;
-                        }
-                    });
-            }
-
-            // Toggle LEDs
-            document.getElementById('toggleLEDs').addEventListener('click', function () {
-                fetch('/toggle_leds', {
-                    method: 'POST'
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            const ledStatus = document.getElementById('ledStatus');
-                            ledStatus.textContent = data.led_status ? 'Active' : 'Inactive';
-                            showAlert(`LEDs ${data.led_status ? 'activated' : 'deactivated'} successfully`, 'success');
-                        } else {
-                            showAlert('Error toggling LEDs', 'danger');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showAlert('Error communicating with server', 'danger');
-                    });
-            });
-
-            // Apply LED settings
-            document.getElementById('applyLEDSettings').addEventListener('click', function () {
-                const updatedSettings = {
-                    led_brightness: parseInt(document.getElementById('ledBrightness').value),
-                    led_pattern: parseInt(document.getElementById('ledPattern').value)
-                };
-
-                Object.assign(settings, updatedSettings);
-
-                fetch('/update_settings', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(updatedSettings)
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showAlert('LED settings updated successfully', 'success');
-                        } else {
-                            showAlert('Error updating LED settings', 'danger');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showAlert('Error communicating with server', 'danger');
-                    });
-            });
-
-            // Clear gallery
-            document.getElementById('clearGalleryBtn').addEventListener('click', function () {
-                if (confirm('Are you sure you want to clear all saved images? This cannot be undone.')) {
-                    fetch('/clear_gallery', {
-                        method: 'POST'
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                showAlert('Gallery cleared successfully', 'success');
-                                loadImageGallery();
-                            } else {
-                                showAlert('Error clearing gallery', 'danger');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            showAlert('Error communicating with server', 'danger');
-                        });
-                }
-            });
-
-            // Refresh gallery
-            document.getElementById('refreshGalleryBtn').addEventListener('click', function () {
-                loadImageGallery();
-                showAlert('Gallery refreshed', 'info');
-            });
-
-            // Save patient form
-            document.getElementById('patientForm').addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                const patientData = {
-                    name: document.getElementById('patientName').value,
-                    age: document.getElementById('patientAge').value,
-                    procedure: document.getElementById('procedureType').value
-                };
-
-                fetch('/save_patient', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(patientData)
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showAlert('Patient information saved successfully', 'success');
-                        } else {
-                            showAlert('Error saving patient information', 'danger');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showAlert('Error communicating with server', 'danger');
-                    });
-            });
-
-            // Save notes
-            document.getElementById('saveNotesBtn').addEventListener('click', function () {
-                const notes = document.getElementById('procedureNotes').value;
-
-                fetch('/save_notes', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ notes: notes })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showAlert('Notes saved successfully', 'success');
-                        } else {
-                            showAlert('Error saving notes', 'danger');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showAlert('Error communicating with server', 'danger');
-                    });
-            });
-
-            // Clear notes
-            document.getElementById('clearNotesBtn').addEventListener('click', function () {
-                document.getElementById('procedureNotes').value = '';
-                showAlert('Notes cleared', 'info');
-            });
-
-            // Handle zoom in/out
-            document.getElementById('zoomInBtn').addEventListener('click', function () {
-                fetch('/zoom', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ action: 'in' })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showAlert('Zoomed in', 'info');
-                        }
-                    });
-            });
-
-            document.getElementById('zoomOutBtn').addEventListener('click', function () {
-                fetch('/zoom', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ action: 'out' })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showAlert('Zoomed out', 'info');
-                        }
-                    });
-            });
-
-            // Rotate image
-            document.getElementById('rotateBtn').addEventListener('click', function () {
-                fetch('/rotate', {
-                    method: 'POST'
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showAlert('Image rotated', 'info');
-                        }
-                    });
-            });
-
-            // Dark mode toggle
-            document.getElementById('darkModeToggle').addEventListener('click', function () {
-                document.body.classList.toggle('dark-mode');
-
-                if (document.body.classList.contains('dark-mode')) {
-                    this.innerHTML = '<i class="fas fa-sun me-2"></i>Light Mode';
-                    localStorage.setItem('darkMode', 'enabled');
-                } else {
-                    this.innerHTML = '<i class="fas fa-moon me-2"></i>Dark Mode';
-                    localStorage.setItem('darkMode', 'disabled');
-                }
-            });
-
-            // Check for saved dark mode preference
-            if (localStorage.getItem('darkMode') === 'enabled') {
-                document.body.classList.add('dark-mode');
-                document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-sun me-2"></i>Light Mode';
-            }
-
-            // Handle fullscreen
-            document.getElementById('fullscreenBtn').addEventListener('click', function () {
-                const videoContainer = document.querySelector('.video-container');
-
-                if (!document.fullscreenElement) {
-                    if (videoContainer.requestFullscreen) {
-                        videoContainer.requestFullscreen();
-                    } else if (videoContainer.webkitRequestFullscreen) {
-                        videoContainer.webkitRequestFullscreen();
-                    } else if (videoContainer.msRequestFullscreen) {
-                        videoContainer.msRequestFullscreen();
-                    }
-                    this.innerHTML = '<i class="fas fa-compress"></i>';
-                } else {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                    } else if (document.webkitExitFullscreen) {
-                        document.webkitExitFullscreen();
-                    } else if (document.msExitFullscreen) {
-                        document.msExitFullscreen();
-                    }
-                    this.innerHTML = '<i class="fas fa-expand"></i>';
-                }
-            });
-
-            // Event listener for fullscreen change
-            document.addEventListener('fullscreenchange', function () {
-                const fullscreenBtn = document.getElementById('fullscreenBtn');
-                if (!document.fullscreenElement) {
-                    fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
-                } else {
-                    fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
-                }
-            });
-
-            // Handle system shutdown
-            document.getElementById('confirmShutdown').addEventListener('click', function () {
-                fetch('/shutdown', {
-                    method: 'POST'
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showAlert('System is shutting down...', 'warning');
-                            // Close the modal
-                            const shutdownModal = bootstrap.Modal.getInstance(document.getElementById('shutdownModal'));
-                            shutdownModal.hide();
-                            // Show a full page message
-                            document.body.innerHTML = `
-                            <div class="d-flex justify-content-center align-items-center vh-100">
-                                <div class="text-center">
-                                    <i class="fas fa-power-off fa-5x text-danger mb-4"></i>
-                                    <h1>System Shutting Down</h1>
-                                    <p class="lead">The Raspberry Pi is now shutting down safely.</p>
-                                    <p>Please wait until the system is fully powered off before disconnecting power.</p>
-                                    <div class="spinner-border text-primary mt-4" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        } else {
-                            showAlert('Error shutting down system: ' + data.message, 'danger');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showAlert('Error communicating with server', 'danger');
-                    });
-            });
-
-            // Load gallery and update camera info on page load
-            loadImageGallery();
-            updateCameraInfo();
-            updateCaptureCounter();
-        });
-    </script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 
 </html>
