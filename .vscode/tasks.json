@@ -1,0 +1,21 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "clean-unnecessary-files",
+			"type": "shell",
+			"command": "set -e\n# Remove macOS DS_Store files and pycache\nfind . -name .DS_Store -delete || true\nrm -rf __pycache__ */__pycache__ || true\n# Keep tests and CI, but remove setup.py if not used as a package\n# Commenting out to avoid breaking packaging; will only print its presence\n[ -f setup.py ] && echo \"setup.py present\" || true\n# List remaining tree summary\nfind . -maxdepth 2 -print | sed -e 's/^\\.\\///' | sort | head -n 200",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "clean-pycaches",
+			"type": "shell",
+			"command": "set -e\nrm -rf __pycache__\nfind . -type d -name __pycache__ -prune -exec rm -rf {} +\n",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}

@@ -29,6 +29,7 @@ This project creates a vein imaging system using near-infrared (NIR) light to im
   - Multiple lighting patterns
 - Image capture and storage
 - Web-based user interface
+ - Research-ready data export and protocol (see research.txt)
 
 ## Installation
 
@@ -79,6 +80,7 @@ This project creates a vein imaging system using near-infrared (NIR) light to im
    - Try different detection methods for various skin types and lighting conditions
    - Adjust exposure and gain based on ambient light
    - Control LED brightness for best contrast
+   - Note: 720p/1080p UI options map to 4:3 sensor modes for full field-of-view
 
 4. Capture and save images for documentation or further analysis
 

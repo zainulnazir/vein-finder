@@ -11,11 +11,11 @@ import platform
 
 
 class VeinCamera:
-    def __init__(self, resolution=(1280, 720), framerate=30, simulation_mode=None):
+    def __init__(self, resolution=(640, 480), framerate=30, simulation_mode=None):
         """Initialize the camera with IR optimization for vein detection
 
         Args:
-            resolution: Tuple of (width, height) - default is 720p
+            resolution: Tuple of (width, height) - default is 480p (4:3)
             framerate: Target framerate
             simulation_mode: Force simulation mode ('vein_sim', 'gradient', or None for auto-detection)
         """
@@ -23,16 +23,22 @@ class VeinCamera:
         self.framerate = framerate
         self.frame = None
         self.stopped = False
-        self.images_dir = "static/images"
+        # Use absolute path for image saves to avoid CWD/permission issues
+        self.images_dir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "static", "images")
+        )
         self.simulation = simulation_mode
-        # Available resolutions with appropriate framerates
+        # Available resolutions with appropriate framerates (prefer 4:3).
+        # Keep UI-friendly names but map 16:9 options to closest 4:3 to avoid FoV/cropping issues on IMX219.
         self.available_resolutions = {
             "480p": {"resolution": (640, 480), "framerate": 30},
-            "720p": {"resolution": (1280, 720), "framerate": 30},
-            "1080p": {"resolution": (1920, 1080), "framerate": 25},
+            "720p": {"resolution": (1024, 768), "framerate": 30},   # Map 720p UI to 1024x768 (4:3)
+            "1080p": {"resolution": (1640, 1232), "framerate": 20}, # Map 1080p UI to 1640x1232 (4:3)
+            "768p": {"resolution": (1024, 768), "framerate": 30},
+            "1232p": {"resolution": (1640, 1232), "framerate": 20},
         }
-        # Highest resolution for captures
-        self.capture_resolution = self.available_resolutions["1080p"]["resolution"]
+        # Highest resolution for captures (Using 4:3)
+        self.capture_resolution = self.available_resolutions["1232p"]["resolution"] # Use 1640x1232 for high-res capture
 
         # Create directory for saved images if it doesn't exist
         os.makedirs(self.images_dir, exist_ok=True)
@@ -66,56 +72,44 @@ class VeinCamera:
 
         try:
             # Configure camera for video mode with current resolution
-            width, height = self.resolution
+            # Define the full sensor crop region
+            # full_sensor_crop = (0, 0, 3280, 2464) # Use full sensor area -- Removing ScalerCrop attempts
+
+            # 1. Create configuration specifying MAIN and RAW streams
+            # Requesting raw stream often forces a specific sensor mode (e.g., full FoV binned)
+            raw_size = (1640, 1232) # IMX219 2x2 binned mode (full FoV)
+            print(f"Requesting main={self.resolution} and raw={raw_size} to encourage full FoV.")
             config = self.picam2.create_video_configuration(
                 main={"size": self.resolution, "format": "RGB888"},
-                lores={"size": (320, 240), "format": "YUV420"},
+                # lores={"size": (320, 240), "format": "YUV420"}, # Removing lores for simplicity
+                raw={"size": raw_size}
             )
 
-            # Calculate proper crop to maintain aspect ratio
-            # For NoIR Camera v2, the native sensor resolution is 3280x2464 (4:3)
-            sensor_width, sensor_height = 3280, 2464
-            target_width, target_height = self.resolution
-            target_aspect = target_width / target_height
-            sensor_aspect = sensor_width / sensor_height
+            # 2. Configure the camera
+            self.picam2.configure(config)
+            print(f"Configured camera for {self.resolution} with raw stream hint.")
 
-            # Calculate the appropriate crop region to maintain aspect ratio
-            if target_aspect > sensor_aspect:
-                # Target is wider than sensor (e.g., 16:9 vs 4:3)
-                # We need to crop the height of the sensor
-                crop_width = sensor_width
-                crop_height = int(sensor_width / target_aspect)
-                crop_x = 0
-                crop_y = (sensor_height - crop_height) // 2
-            else:
-                # Target is taller than or equal to sensor
-                crop_height = sensor_height
-                crop_width = int(sensor_height * target_aspect)
-                crop_x = (sensor_width - crop_width) // 2
-                crop_y = 0
+            # 3. Set ScalerCrop AFTER configuration ## REMOVED ## START
+            # try:
+            #      print(f"Attempting to set ScalerCrop post-config: {full_sensor_crop}")
+            #      self.picam2.set_controls({"ScalerCrop": full_sensor_crop})
+            #      print("ScalerCrop set successfully post-config.")
+            # except Exception as e:
+            #      print(f"Warning: Failed to set ScalerCrop post-config: {e}")
+            # 3. Set ScalerCrop AFTER configuration ## REMOVED ## END
 
-            # Try to set transform parameter separately if available
+            # Set OTHER camera parameters optimal for IR imaging (AFTER configure)
             try:
-                self.picam2.configure(config)
-                if hasattr(self.picam2, "set_controls") and "ScalerCrop" in dir(
-                    self.picam2
-                ):
-                    self.picam2.set_controls(
-                        {"ScalerCrop": (crop_x, crop_y, crop_width, crop_height)}
-                    )
-            except:
-                # If that fails, use basic configuration
-                self.picam2.configure(config)
-
-            # Set camera parameters optimal for IR imaging
-            self.picam2.set_controls(
-                {
-                    "ExposureTime": 20000,  # Higher exposure for IR
-                    "AnalogueGain": 6.0,  # Gain setting from working example
-                    "Saturation": 1.0,  # Default saturation
-                    "Sharpness": 1.0,  # Default sharpness
-                }
-            )
+                self.picam2.set_controls(
+                    {
+                        "ExposureTime": 20000,  # Higher exposure for IR
+                        "AnalogueGain": 6.0,  # Gain setting from working example
+                        "Saturation": 1.0,  # Default saturation
+                        "Sharpness": 1.0,  # Default sharpness
+                    }
+                )
+            except Exception as e:
+                 print(f"Warning: Could not set post-config controls (Exposure/Gain etc): {e}")
 
             # Try to set noise reduction if available
             try:
@@ -198,45 +192,34 @@ class VeinCamera:
             current_resolution = self.resolution
 
             # Calculate target aspect ratio
-            target_aspect = current_resolution[0] / current_resolution[1]
+            # target_aspect = current_resolution[0] / current_resolution[1] # Not needed
+
+            # Define the full sensor crop region
+            # full_sensor_crop = (0, 0, 3280, 2464) # Removed
 
             # Temporarily switch to high resolution for capture
+            # Use the desired capture resolution and matching raw stream size
+            raw_size = (1640, 1232) # Match capture res for consistency
+            print(f"Requesting still main={self.capture_resolution} and raw={raw_size}.")
             config = self.picam2.create_still_configuration(
-                main={"size": self.capture_resolution, "format": "RGB888"}
+                main={"size": self.capture_resolution, "format": "RGB888"}, # Use 4:3 high-res (1640x1232)
+                raw={"size": raw_size}
             )
-            self.picam2.switch_mode_and_capture_array(config)
+            # Capture the returned array from switch_mode_and_capture_array
+            high_res_frame = self.picam2.switch_mode_and_capture_array(config)
 
-            # Capture a high-resolution image
-            high_res_frame = self.picam2.capture_array()
+            if high_res_frame is None:
+                raise ValueError("switch_mode_and_capture_array returned None")
+            print(f"High-res frame captured with shape: {high_res_frame.shape}") # Add log
 
-            # Crop to match target aspect ratio
-            src_height, src_width = high_res_frame.shape[:2]
-            src_aspect = src_width / src_height
-
-            if abs(target_aspect - src_aspect) > 0.01:  # If aspect ratios differ
-                if target_aspect > src_aspect:
-                    # Target is wider (e.g., 16:9) than image (e.g., 4:3)
-                    crop_width = src_width
-                    crop_height = int(src_width / target_aspect)
-                    crop_y = (src_height - crop_height) // 2
-                    crop_x = 0
-                else:
-                    # Target is taller than image
-                    crop_height = src_height
-                    crop_width = int(src_height * target_aspect)
-                    crop_x = (src_width - crop_width) // 2
-                    crop_y = 0
-
-                # Crop the image to match the target aspect ratio
-                high_res_frame = high_res_frame[
-                    crop_y : crop_y + crop_height, crop_x : crop_x + crop_width
-                ]
-
-            # Return to the previous configuration
-            config = self.picam2.create_video_configuration(
-                main={"size": current_resolution, "format": "RGB888"}
+            # Return to the previous configuration (video)
+            # Recreate video config using the same logic as _configure_camera
+            raw_size_video = (1640, 1232)
+            video_config = self.picam2.create_video_configuration(
+                main={"size": current_resolution, "format": "RGB888"},
+                raw={"size": raw_size_video}
             )
-            self.picam2.switch_mode(config)
+            self.picam2.switch_mode(video_config)
 
             return high_res_frame
         except Exception as e:
@@ -350,18 +333,26 @@ class VeinCamera:
         """Stop the camera thread"""
         self.stopped = True
 
-    def save_image(self, processed_frame=None):
-        """Save the current frame or processed frame to disk"""
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"vein_{timestamp}.jpg"
+    def save_image(self, frame_to_save, suffix=""):
+        """Save the given frame to disk with an optional filename suffix."""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f") # Added microseconds for uniqueness
+        base_filename = f"vein_{timestamp}"
+        filename = f"{base_filename}{suffix}.jpg"
         filepath = os.path.join(self.images_dir, filename)
 
-        if processed_frame is not None:
-            cv2.imwrite(filepath, processed_frame)
-        else:
-            cv2.imwrite(filepath, self.frame)
-
-        return filename
+        try:
+            # Ensure the frame is not None and is a numpy array
+            if frame_to_save is not None and isinstance(frame_to_save, np.ndarray):
+                # Save with high quality
+                cv2.imwrite(filepath, frame_to_save, [cv2.IMWRITE_JPEG_QUALITY, 95])
+                print(f"Image saved to: {filepath}")
+                return filename
+            else:
+                print("Error: Frame to save is None or not a valid image.")
+                return None
+        except Exception as e:
+            print(f"Error saving image {filepath}: {e}")
+            return None
 
     def adjust_settings(self, exposure=None, gain=None):
         """Adjust camera settings for optimal vein imaging"""
