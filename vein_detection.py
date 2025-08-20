@@ -62,21 +62,24 @@ class VeinDetector:
 
     def preprocess(self, image):
         """Preprocess the image for vein detection"""
-        # Convert to grayscale if needed
+        # Convert to grayscale if needed (camera frames are BGR)
         if len(image.shape) > 2 and image.shape[2] == 3:
-            gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         else:
             gray = image.copy()
 
         # Apply CLAHE (using potentially updated object)
         clahe_img = self.clahe.apply(gray)
 
-        # Use median blur (configurable) - ensure odd and >= 3
+        # Use median blur (configurable); support k=1 as no blur to preserve detail
         k = int(self.params.get("median_ksize", 3))
-        if k % 2 == 0:
-            k += 1
-        k = max(3, min(k, 11))
-        blurred = cv2.medianBlur(clahe_img, k)
+        if k <= 1:
+            blurred = clahe_img
+        else:
+            if k % 2 == 0:
+                k += 1
+            k = max(3, min(k, 11))
+            blurred = cv2.medianBlur(clahe_img, k)
 
         return blurred
 
@@ -84,12 +87,18 @@ class VeinDetector:
         """Detect veins in the image using specified method"""
         # Preprocessing uses potentially updated CLAHE settings
         preprocessed = self.preprocess(image)
+        # Also keep a raw grayscale version for methods that work best on raw contrast (e.g., Frangi)
+        if len(image.shape) > 2 and image.shape[2] == 3:
+            raw_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        else:
+            raw_gray = image.copy()
 
         # Pass current parameters to the methods that need them
         if method == "adaptive":
             return self._adaptive_threshold_method(preprocessed, self.params)
         elif method == "frangi":
-            return self._frangi_filter_method(preprocessed, self.params)
+            # Use raw grayscale (no CLAHE pre-processing) for Frangi for better ridge detection
+            return self._frangi_filter_method(raw_gray, self.params)
         elif method == "laplacian":
             # Laplacian method doesn't use specific tunable params
             return self._laplacian_method(preprocessed)
@@ -208,28 +217,30 @@ class VeinDetector:
 
     def _laplacian_method(self, image):
         """Use Laplacian filter with blended overlay."""
-        laplacian = cv2.Laplacian(image, cv2.CV_64F)
-        laplacian = np.uint8(np.absolute(laplacian))
+        # Operate on grayscale
+        if len(image.shape) == 3 and image.shape[2] == 3:
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = image
 
-        # Increase threshold to reduce noise sensitivity
-        threshold_value = 25 # Increased from 10
-        _, binary = cv2.threshold(laplacian, threshold_value, 255, cv2.THRESH_BINARY)
+        lap = cv2.Laplacian(gray, cv2.CV_64F)
+        lap = np.uint8(np.absolute(lap))
 
-        # Use a slightly larger kernel for closing/opening
-        close_kernel = np.ones((3, 3), np.uint8) # Keep 3x3 for closing gaps
-        open_kernel = np.ones((5, 5), np.uint8) # Use 5x5 for opening to remove noise
+        # Slightly lower threshold to capture finer ridges
+        threshold_value = 18
+        _, binary = cv2.threshold(lap, threshold_value, 255, cv2.THRESH_BINARY)
 
+        # Morph clean-up
+        close_kernel = np.ones((3, 3), np.uint8)
+        open_kernel = np.ones((5, 5), np.uint8)
         cleaned = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, close_kernel)
         cleaned = cv2.morphologyEx(cleaned, cv2.MORPH_OPEN, open_kernel)
 
-        # --- Visualization (Blended Overlay) ---
-        background = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-        # Create blue mask where veins are detected
+        # Visualization overlay
+        background = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
         mask = np.zeros_like(background)
-        mask[cleaned == 255] = [255, 0, 0] # Blue color
-        # Blend the mask with the background
-        result = cv2.addWeighted(background, 0.8, mask, 0.5, 0) # Adjust weights as needed
-
+        mask[cleaned == 255] = [255, 0, 0]
+        result = cv2.addWeighted(background, 0.75, mask, 0.6, 0)
         return result
 
     def enhance_contrast(self, image, method="clahe", clip_limit=3.0):

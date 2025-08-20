@@ -79,7 +79,31 @@
         if (jpegQ) setText('jpegQualityValue', `${jpegQ.value}`);
     };
     [liveScale, streamFps, jpegQ].forEach((el) => el?.addEventListener('input', syncLiveLabels));
-    liveMethodRadios.forEach((r) => r.addEventListener('change', () => {}));
+    liveMethodRadios.forEach((r) => r.addEventListener('change', async (e) => {
+        try {
+            const method = e.target.value;
+            const payload = { live_processing_method: method };
+            const r = await postJSON('/update_settings', payload);
+            if (r.success) {
+                window.__liveMethod = method;
+                updateHUD(payload);
+                const img = document.getElementById('videoStream');
+                if (img && img.src) { const base = img.src.split('?')[0]; img.src = `${base}?t=${Date.now()}`; }
+                showToast(`Live method: ${method}`, 'info');
+            }
+        } catch (_) {}
+    }));
+
+    // Persist capture detection method immediately
+    document.getElementById('detectionMethod')?.addEventListener('change', async (e) => {
+        const v = e.target.value;
+        try {
+            const r = await postJSON('/update_settings', { detection_method: v });
+            if (r.success) {
+                showToast(`Capture method: ${v}`, 'info');
+            }
+        } catch (_) { showToast('Failed to set method', 'danger'); }
+    });
     syncLiveLabels();
 
     $('#applyLiveSettings')?.addEventListener('click', async () => {
